@@ -26,6 +26,7 @@ a { color: inherit; text-decoration: none; }
 .brand { display: flex; align-items: center; gap: 10px; font-weight: 730; }
 .brand svg { width: 36px; height: 36px; color: var(--mint); fill: #1b3b38; stroke: currentColor; stroke-width: 1.3; }
 .brand small { margin-left: 8px; font: 10px var(--mono); color: var(--muted); letter-spacing: .12em; }
+.header-actions { display: flex; align-items: center; gap: 10px; }
 .header-link { color: var(--muted); font-size: 13px; white-space: nowrap; }
 .header-link span { color: var(--mint); margin-left: 3px; }
 .header-link:hover { color: var(--mint); }
