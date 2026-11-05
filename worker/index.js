@@ -5,7 +5,7 @@ const maxAttempts = 10;
 const encoder = new TextEncoder();
 const commonHeaders = {
   "Cache-Control": "private, no-store",
-  "Referrer-Policy": "no-referrer",
+  "Referrer-Policy": "same-origin",
   "X-Content-Type-Options": "nosniff",
   "X-Robots-Tag": "noindex, nofollow",
   "Content-Security-Policy": "default-src 'none'; style-src 'self' 'unsafe-inline'; script-src 'self'; form-action 'self'; base-uri 'none'; frame-ancestors 'none'",
@@ -147,7 +147,9 @@ export default {
     }
     const url = new URL(request.url);
     if (request.method === "POST" && ["/login", "/logout"].includes(url.pathname)) {
-      if (request.headers.get("Origin") !== url.origin) return reply(null, 403);
+      if (request.headers.get("Origin") !== url.origin) {
+        return loginPage("请从实验室登录页重新提交。", 403);
+      }
       if (url.pathname === "/logout") return reply(null, 303, { Location: "/", "Set-Cookie": cookie("", 0) });
       return login(request, env, ctx);
     }
