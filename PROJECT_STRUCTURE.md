@@ -1,0 +1,57 @@
+# 相机标定交互实验室项目说明
+
+## 文件层次
+
+- **`site-assets/`** 存放浏览器运行的网页源码。
+  - [`index.html`](site-assets/index.html) 是网页入口，定义滑块、实时视图、矩阵和逐点计算的页面结构。
+  - [`style.css`](site-assets/style.css) 控制配色、排版和手机屏幕上的布局。
+  - [`lab.mjs`](site-assets/lab.mjs) 读取滑块和按钮操作，调用标定模型，再更新棋盘格、三维坐标视图、矩阵和误差。
+  - [`model.mjs`](site-assets/model.mjs) 存放默认参数和数学模型，负责计算相机内参、标定板姿态、单应矩阵、像素坐标和重投影误差。
+- **`worker/`** 存放线上站点的服务器代码。
+  - [`index.js`](worker/index.js) 校验站点密码、管理登录会话，并在验证通过后返回网页和资源。
+- **`drizzle/`** 存放线上数据库的迁移文件。
+  - [`0000_login_attempts.sql`](drizzle/0000_login_attempts.sql) 创建记录登录尝试次数的表和索引。
+  - [`meta/_journal.json`](drizzle/meta/_journal.json) 记录数据库迁移顺序。
+- **`scripts/`** 存放构建脚本。
+  - [`build.mjs`](scripts/build.mjs) 读取四个网页文件，将它们与服务器代码打包，生成 `dist/server/index.js`，并把托管配置复制到 `dist/.openai/`。
+- **`.openai/`** 存放托管配置。
+  - [`hosting.json`](.openai/hosting.json) 记录站点标识和 D1 数据库绑定。
+- **仓库根目录**
+  - [`package.json`](package.json) 定义 `npm run build`。
+  - [`.gitignore`](.gitignore) 忽略构建生成的 `dist/`。
+  - [`README.md`](README.md) 是仓库首页说明。
+  - `PROJECT_STRUCTURE.md` 是当前项目说明。
+
+## 怎样运行
+
+### 在自己电脑上预览
+
+在 GitHub 仓库点 **Code → Download ZIP**，下载并解压。在包含 `package.json` 的目录打开终端，执行：
+
+```bash
+python -m http.server 8000 --bind 127.0.0.1 --directory site-assets
+```
+
+保持终端开着，在浏览器打开 [http://127.0.0.1:8000](http://127.0.0.1:8000)。如果电脑用 `python3` 启动 Python，把命令开头的 `python` 换成 `python3`。通过这个地址访问，浏览器可以加载 `.mjs` 模块。
+
+### 在 GitHub Codespaces 预览
+
+如果 **Code** 菜单有 **Codespaces**，从 `main` 创建一个 Codespace，在它的终端执行：
+
+```bash
+python3 -m http.server 8000 --directory site-assets
+```
+
+在 **Ports** 面板打开端口 `8000` 的预览链接，端口可见性选择 **Private**。操作说明见 [GitHub 的端口转发文档](https://docs.github.com/en/codespaces/developing-in-a-codespace/forwarding-ports-in-your-codespace)。
+
+以上两种方式运行网页实验部分。密码登录和退出由线上服务器处理，可在[线上实验室](https://camera-calibration-lab-d00b8.edgedchalk.chatgpt.site/)使用。
+
+### 构建线上版本
+
+在仓库根目录运行 `npm run build`，生成 `dist/` 下的部署文件。构建和运行是两个步骤。线上服务器运行时需要 D1 数据库绑定 `DB`，以及托管环境中配置的 `LAB_ACCESS_PASSWORD` 和 `LAB_SESSION_KEY`。
+
+## 从哪里开始读代码
+
+想改布局或中文说明，从 [`site-assets/index.html`](site-assets/index.html) 开始。想改滑块范围、预设姿态或绘图，从 [`site-assets/lab.mjs`](site-assets/lab.mjs) 开始。
+
+想对照标定公式，先读 [`site-assets/model.mjs`](site-assets/model.mjs) 的 `model()`。例如拖动主点横坐标 `u0` 时，`lab.mjs` 把新值交给 `model()`，再用返回结果更新角点位置、单应矩阵和误差读数。
